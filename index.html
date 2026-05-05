@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#1a6abf" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SAU Prep" />
+  <title>SAU Voorbereiding</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blue-main: #1a6abf;
+      --blue-tab: #2278cc;
+      --c-kracht-bg: #edf4fc;
+      --c-kracht-tx: #2d6fad;
+      --c-se-bg: #fdf3e7;
+      --c-se-tx: #a0600a;
+      --c-hic-bg: #fdf0f0;
+      --c-hic-tx: #b94040;
+      --c-uithouding-bg: #edf7ed;
+      --c-uithouding-tx: #3a7d3a;
+      --c-test-bg: #f1f0fd;
+      --c-test-tx: #5a52a8;
+      --c-rust-bg: #f2f2f2;
+      --c-rust-tx: #555555;
+      --bg: #f2f4f7;
+      --card: #ffffff;
+      --border: rgba(0,0,0,0.09);
+      --text: #1a1a1a;
+      --text-muted: #6b7280;
+      --text-hint: #a0a8b4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1621;
+        --card: #1c2333;
+        --border: rgba(255,255,255,0.09);
+        --text: #eef0f4;
+        --text-muted: #8b95a6;
+        --text-hint: #5a6272;
+        --c-kracht-bg: #162236;
+        --c-kracht-tx: #7ab8f5;
+        --c-se-bg: #2a1e0a;
+        --c-se-tx: #f0a840;
+        --c-hic-bg: #2a1212;
+        --c-hic-tx: #f08080;
+        --c-uithouding-bg: #102210;
+        --c-uithouding-tx: #80d080;
+        --c-test-bg: #1a1840;
+        --c-test-tx: #a09cf0;
+        --c-rust-bg: #252525;
+        --c-rust-tx: #aaaaaa;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; }
+    body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
+
+    .header {
+      background: var(--blue-main); color: white;
+      padding-top: calc(12px + env(safe-area-inset-top));
+      padding-bottom: 12px; padding-left: 16px; padding-right: 16px;
+      text-align: center; flex-shrink: 0;
+    }
+    .header-title { font-family: 'Barlow Condensed', sans-serif; font-size: 19px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+    .header-sub { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+
+    .week-tabs { display: flex; overflow-x: auto; background: var(--blue-tab); scrollbar-width: none; flex-shrink: 0; }
+    .week-tabs::-webkit-scrollbar { display: none; }
+    .week-tab {
+      flex: 0 0 auto; padding: 10px 15px;
+      font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 500;
+      color: rgba(255,255,255,0.5); cursor: pointer;
+      border: none; border-bottom: 2px solid transparent;
+      background: none; white-space: nowrap; transition: color 0.15s;
+    }
+    .week-tab.active { color: white; border-bottom-color: #a8d4ff; }
+
+    .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 11px 11px calc(11px + env(safe-area-inset-bottom)); }
+
+    .week-header-card {
+      background: var(--card); border: 0.5px solid var(--border);
+      border-radius: 12px; padding: 12px 15px; margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .week-header-title { font-weight: 600; font-size: 14px; color: var(--text); }
+    .week-header-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .badge {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 20px; white-space: nowrap;
+    }
+    .badge-75 { background: var(--c-kracht-bg); color: var(--c-kracht-tx); }
+    .badge-80 { background: var(--c-uithouding-bg); color: var(--c-uithouding-tx); }
+    .badge-90 { background: var(--c-se-bg); color: var(--c-se-tx); }
+    .badge-se { background: var(--c-se-bg); color: var(--c-se-tx); }
+
+    .section-title {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase; color: var(--text-hint);
+      margin: 13px 0 7px 2px;
+    }
+
+    .card { background: var(--card); border: 0.5px solid var(--border); border-radius: 12px; margin-bottom: 7px; overflow: hidden; }
+
+    .lift-table { padding: 8px 14px; }
+    .lift-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+    .lift-row:last-child { border-bottom: none; }
+    .lift-name { color: var(--text-muted); }
+    .lift-val { font-weight: 600; color: var(--text); }
+    .lift-sets-label { font-size: 11px; font-weight: 400; color: var(--text-hint); margin-left: 5px; }
+    .se-cat { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-hint); padding: 8px 0 3px; }
+
+    .day-header { display: flex; align-items: center; padding: 11px 14px; gap: 9px; }
+    .day-date { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted); min-width: 80px; }
+    .shift-badge { font-size: 11px; padding: 3px 8px; border-radius: 9px; font-weight: 500; }
+    .shift-dag { background: var(--c-kracht-bg); color: var(--c-kracht-tx); }
+    .shift-corvee { background: var(--c-rust-bg); color: var(--c-rust-tx); }
+    .shift-nachtop { background: #1f2937; color: #c8d0dc; }
+    .shift-nachtaf { background: #151d2b; color: #8a96a8; }
+    .shift-rust { background: var(--c-uithouding-bg); color: var(--c-uithouding-tx); }
+
+    .training-section { border-top: 0.5px solid var(--border); padding: 9px 14px; }
+    .training-label { font-size: 10px; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 7px; }
+
+    .training-pill { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+    .pill-kracht { background: var(--c-kracht-bg); color: var(--c-kracht-tx); }
+    .pill-krachtuithouding { background: var(--c-se-bg); color: var(--c-se-tx); }
+    .pill-hic { background: var(--c-hic-bg); color: var(--c-hic-tx); }
+    .pill-uithouding { background: var(--c-uithouding-bg); color: var(--c-uithouding-tx); }
+    .pill-test { background: var(--c-test-bg); color: var(--c-test-tx); }
+    .pill-rust { background: var(--c-rust-bg); color: var(--c-rust-tx); }
+
+    .assign-btn {
+      display: flex; align-items: center; gap: 6px; padding: 7px 12px;
+      background: none; border: 0.5px solid var(--border); border-radius: 20px;
+      font-family: 'Barlow', sans-serif; font-size: 13px; color: var(--text-muted);
+      cursor: pointer; width: 100%; text-align: left; transition: background 0.1s;
+    }
+    .assign-btn:active { background: var(--bg); }
+
+    .type-picker { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 6px; margin-top: 8px; }
+    .type-opt {
+      padding: 11px 6px; border-radius: 9px; border: none;
+      font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: pointer; text-align: center; transition: opacity 0.1s;
+    }
+    .type-opt:active { opacity: 0.7; }
+    .opt-kracht { background: var(--c-kracht-bg); color: var(--c-kracht-tx); }
+    .opt-krachtuithouding { background: var(--c-se-bg); color: var(--c-se-tx); }
+    .opt-hic { background: var(--c-hic-bg); color: var(--c-hic-tx); }
+    .opt-uithouding { background: var(--c-uithouding-bg); color: var(--c-uithouding-tx); }
+    .opt-test { background: var(--c-test-bg); color: var(--c-test-tx); }
+    .opt-rust { background: var(--c-rust-bg); color: var(--c-rust-tx); }
+
+    .detail-block { margin-top: 8px; background: var(--bg); border-radius: 8px; padding: 8px 10px; }
+    .pill-row { display: flex; align-items: center; gap: 8px; }
+    .remove-btn { background: none; border: none; color: var(--text-hint); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 2px; }
+
+    .overview-table { padding: 2px 14px; }
+    .overview-row { display: flex; align-items: center; gap: 8px; padding: 9px 0; }
+    .overview-border { border-bottom: 0.5px solid var(--border); }
+    .overview-date { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text); min-width: 72px; }
+
+    .progress-wrap { padding: 4px 0 8px; }
+    .progress-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+    .progress-track { background: var(--border); border-radius: 10px; height: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--blue-main); border-radius: 10px; transition: width 0.3s; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-title">SAU Voorbereiding — Blok 1</div>
+    <div class="header-sub">4 MEI – 5 JULI 2026 &nbsp;·&nbsp; FIGHTER TEMPLATE</div>
+  </div>
+  <div class="week-tabs" id="weekTabs"></div>
+  <div class="scroll-area" id="scrollArea">
+    <div id="weekContent"></div>
+  </div>
+
+  <script>
+    const SHIFT_LABELS  = ['Nacht Op','Nacht Af','Rust 1','Rust 2','Dag (07–19)','Corvee'];
+    const SHIFT_CLASSES = ['shift-nachtop','shift-nachtaf','shift-rust','shift-rust','shift-dag','shift-corvee'];
+    const PULLUP_MAX = 8;
+
+    const SE_DATA = [
+      { reps:30, high:[['Push-ups','3×30'],['Sit-ups','3×30'],['KB swings','3×30'],['Goblet squats','3×30']], medium:[['Dips','3×15'],['Pull-ups','3×5']], time:[['Suitcase carry','3×60 sec'],['Plank','3×60 sec']] },
+      { reps:40, high:[['Push-ups','3×40'],['Sit-ups','3×40'],['KB swings','3×40'],['Goblet squats','3×40']], medium:[['Dips','3×20'],['Pull-ups','3×7']], time:[['Suitcase carry','3×60 sec'],['Plank','3×60 sec']] },
+      { reps:50, high:[['Push-ups','3×50'],['Sit-ups','3×50'],['KB swings','3×50'],['Goblet squats','3×50']], medium:[['Dips','3×25'],['Pull-ups','3×10']], time:[['Suitcase carry','3×60 sec'],['Plank','3×60 sec']] }
+    ];
+
+    const WEEKS = [
+      { label:'Week 1', pct:75, sets:'3–5×5', badge:'badge-75', start:new Date(2026,4,4),  seIdx:null, eduur:75 },
+      { label:'Week 2', pct:80, sets:'3–5×5', badge:'badge-80', start:new Date(2026,4,11), seIdx:null, eduur:80 },
+      { label:'Week 3', pct:90, sets:'3–5×3', badge:'badge-90', start:new Date(2026,4,18), seIdx:null, eduur:60 },
+      { label:'Week 4', pct:75, sets:'3–5×5', badge:'badge-75', start:new Date(2026,4,25), seIdx:null, eduur:80 },
+      { label:'Week 5', pct:80, sets:'3–5×5', badge:'badge-80', start:new Date(2026,5,1),  seIdx:null, eduur:85 },
+      { label:'Week 6', pct:90, sets:'3–5×3', badge:'badge-90', start:new Date(2026,5,8),  seIdx:null, eduur:60 },
+      { label:'Week 7', pct:null, sets:null, badge:'badge-se', start:new Date(2026,5,15), seIdx:0, eduur:90 },
+      { label:'Week 8', pct:null, sets:null, badge:'badge-se', start:new Date(2026,5,22), seIdx:1, eduur:90 },
+      { label:'Week 9', pct:null, sets:null, badge:'badge-se', start:new Date(2026,5,29), seIdx:2, eduur:60 },
+    ];
+
+    const BARBELL = [
+      { name:'Bench Press', max:90 },
+      { name:'Deadlift',    max:120 },
+      { name:'Squat',       max:120 },
+    ];
+
+    const TYPES = [
+      { key:'kracht',           label:'Kracht',           cls:'opt-kracht',           pill:'pill-kracht' },
+      { key:'krachtuithouding', label:'Krachtuithouding', cls:'opt-krachtuithouding', pill:'pill-krachtuithouding' },
+      { key:'hic',              label:'HIC',              cls:'opt-hic',              pill:'pill-hic' },
+      { key:'uithouding',       label:'Uithouding',       cls:'opt-uithouding',       pill:'pill-uithouding' },
+      { key:'test',             label:'Test',             cls:'opt-test',             pill:'pill-test' },
+      { key:'rust',             label:'Rust',             cls:'opt-rust',             pill:'pill-rust' },
+    ];
+
+    const DAYS_NL   = ['Zo','Ma','Di','Wo','Do','Vr','Za'];
+    const MONTHS_NL = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+
+    let state = {};
+    try { state = JSON.parse(localStorage.getItem('sau_v2') || '{}'); } catch(e) {}
+    let activeWeek = 0;
+    let openPicker = null;
+
+    function save()           { try { localStorage.setItem('sau_v2', JSON.stringify(state)); } catch(e) {} }
+    function kg(max, pct)     { return Math.round(max * pct / 100 / 2.5) * 2.5; }
+    function puReps(pct)      { return Math.floor(PULLUP_MAX * pct / 100); }
+    function shiftIdx(wi, di) { return (wi * 7 + di) % 6; }
+    function dayDate(s, di)   { const d = new Date(s); d.setDate(d.getDate()+di); return d; }
+
+    function liftRows(week) {
+      const pct = week.pct;
+      let h = BARBELL.map(l =>
+        `<div class="lift-row"><span class="lift-name">${l.name}</span><span class="lift-val">${kg(l.max,pct)} kg<span class="lift-sets-label">${week.sets}</span></span></div>`
+      ).join('');
+      h += `<div class="lift-row"><span class="lift-name">Pull-ups</span><span class="lift-val">${puReps(pct)} reps</span></div>`;
+      return h;
+    }
+
+    function seRows(se) {
+      let h = '';
+      h += `<div class="se-cat">Hoge reps</div>`;
+      h += se.high.map(([n,v])   => `<div class="lift-row"><span class="lift-name">${n}</span><span class="lift-val">${v}</span></div>`).join('');
+      h += `<div class="se-cat">Medium reps</div>`;
+      h += se.medium.map(([n,v]) => `<div class="lift-row"><span class="lift-name">${n}</span><span class="lift-val">${v}</span></div>`).join('');
+      h += `<div class="se-cat">Time-based</div>`;
+      h += se.time.map(([n,v])   => `<div class="lift-row"><span class="lift-name">${n}</span><span class="lift-val">${v}</span></div>`).join('');
+      return h;
+    }
+
+    function renderTabs() {
+      document.getElementById('weekTabs').innerHTML = WEEKS.map((w,i) =>
+        `<button class="week-tab ${i===activeWeek?'active':''}" onclick="setWeek(${i})">${w.label}</button>`
+      ).join('');
+    }
+
+    function renderWeek() {
+      const week  = WEEKS[activeWeek];
+      const isMS  = week.pct !== null;
+      const isSE  = week.seIdx !== null;
+      const se    = isSE ? SE_DATA[week.seIdx] : null;
+      let html = '';
+
+      if (isMS) {
+        html += `<div class="week-header-card">
+          <div>
+            <div class="week-header-title">Fighter Template</div>
+            <div class="week-header-sub">${week.sets} @ ${week.pct}% · Pull-ups: ${puReps(week.pct)} reps</div>
+          </div>
+          <span class="badge ${week.badge}">${week.pct}%</span>
+        </div>`;
+        html += `<div class="section-title">Gewichten deze week</div>`;
+        html += `<div class="card"><div class="lift-table">${liftRows(week)}</div></div>`;
+      } else if (isSE) {
+        html += `<div class="week-header-card">
+          <div>
+            <div class="week-header-title">Krachtuithouding</div>
+            <div class="week-header-sub">3 sets × ${se.reps} reps (hoge oefeningen)</div>
+          </div>
+          <span class="badge badge-se">SE</span>
+        </div>`;
+        html += `<div class="section-title">Circuit deze week</div>`;
+        html += `<div class="card"><div class="lift-table">${seRows(se)}</div></div>`;
+      }
+
+      html += `<div class="section-title">Weekplanning</div>`;
+
+      for (let d = 0; d < 7; d++) {
+        const date      = dayDate(week.start, d);
+        const dateStr   = `${DAYS_NL[date.getDay()]} ${date.getDate()} ${MONTHS_NL[date.getMonth()]}`;
+        const si        = shiftIdx(activeWeek, d);
+        const dayKey    = `w${activeWeek}_d${d}`;
+        const assigned  = state[dayKey];
+        const isPicking = openPicker === dayKey;
+        const typeObj   = assigned ? TYPES.find(t => t.key === assigned) : null;
+
+        html += `<div class="card">
+          <div class="day-header">
+            <span class="day-date">${dateStr}</span>
+            <span class="shift-badge ${SHIFT_CLASSES[si]}">${SHIFT_LABELS[si]}</span>
+          </div>
+          <div class="training-section">
+            <div class="training-label">Training</div>`;
+
+        if (assigned && !isPicking) {
+          html += `<div class="pill-row">
+            <span class="training-pill ${typeObj.pill}">${typeObj.label}</span>
+            <button class="remove-btn" onclick="removeAssign('${dayKey}')">×</button>
+          </div>`;
+          if (assigned === 'kracht' && isMS) {
+            html += `<div class="detail-block"><div class="lift-table" style="padding:0;">${liftRows(week)}</div></div>`;
+          }
+          if (assigned === 'krachtuithouding' && isSE) {
+            html += `<div class="detail-block"><div class="lift-table" style="padding:0;">${seRows(se)}</div></div>`;
+          }
+          if (assigned === 'uithouding') {
+            html += `<div class="detail-block"><div class="lift-row" style="border:none;padding:4px 0;"><span class="lift-name">Duur</span><span class="lift-val">${week.eduur} min</span></div></div>`;
+          }
+        } else if (isPicking) {
+          html += `<div class="type-picker">
+            ${TYPES.map(t => `<button class="type-opt ${t.cls}" onclick="assignType('${dayKey}','${t.key}')">${t.label}</button>`).join('')}
+          </div>`;
+        } else {
+          html += `<button class="assign-btn" onclick="openPickerFor('${dayKey}')">
+            <span style="font-size:16px;line-height:1;">+</span> Training toevoegen
+          </button>`;
+        }
+
+        html += `</div></div>`;
+      }
+
+      const n   = Array.from({length:7}, (_,i) => state[`w${activeWeek}_d${i}`]).filter(Boolean).length;
+      const pct = Math.round(n / 7 * 100);
+      html += `<div class="progress-wrap">
+        <div class="progress-meta"><span>Geplande sessies</span><span>${n} / 7</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      </div>`;
+
+      const overviewRows = [];
+      for (let d = 0; d < 7; d++) {
+        const dk    = `w${activeWeek}_d${d}`;
+        const asgn  = state[dk];
+        if (!asgn) continue;
+        const date    = dayDate(week.start, d);
+        const dateStr = `${DAYS_NL[date.getDay()]} ${date.getDate()} ${MONTHS_NL[date.getMonth()]}`;
+        const si      = shiftIdx(activeWeek, d);
+        const typeObj = TYPES.find(t => t.key === asgn);
+        overviewRows.push({ dateStr, shift: SHIFT_LABELS[si], shiftCls: SHIFT_CLASSES[si], typeObj });
+      }
+
+      if (overviewRows.length > 0) {
+        html += `<div class="section-title">Weekoverzicht</div>`;
+        html += `<div class="card"><div class="overview-table">`;
+        html += overviewRows.map((r, i) => `
+          <div class="overview-row ${i < overviewRows.length - 1 ? 'overview-border' : ''}">
+            <span class="overview-date">${r.dateStr}</span>
+            <span class="shift-badge ${r.shiftCls}" style="font-size:10px;padding:2px 7px;">${r.shift}</span>
+            <span class="training-pill ${r.typeObj.pill}" style="padding:3px 10px;font-size:12px;margin-left:auto;">${r.typeObj.label}</span>
+          </div>`).join('');
+        html += `</div></div>`;
+      }
+
+      const scrollEl = document.getElementById('scrollArea');
+      const prevScroll = scrollEl ? scrollEl.scrollTop : 0;
+      document.getElementById('weekContent').innerHTML = html;
+      if (scrollEl) scrollEl.scrollTop = prevScroll;
+    }
+
+    function setWeek(i)          { activeWeek = i; openPicker = null; renderTabs(); renderWeek(); document.getElementById('scrollArea').scrollTop = 0; }
+    function openPickerFor(k)    { openPicker = openPicker === k ? null : k; renderWeek(); }
+    function assignType(k, type) { state[k] = type; openPicker = null; save(); renderWeek(); }
+    function removeAssign(k)     { delete state[k]; openPicker = null; save(); renderWeek(); }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+
+    renderTabs();
+    renderWeek();
+  </script>
+</body>
+</html>
